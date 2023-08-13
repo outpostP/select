@@ -11,18 +11,18 @@ const validateRequest = (req, res, next) => {
 };
 
 const validateLogin = [
-  body("username").notEmpty().withMessage("Username is required"),
+  body("id").notEmpty().withMessage("Id is required"),
   body("password").notEmpty().withMessage("Password is required"),
 ];
 
 const validateRegistration = [
-  body("username")
+  body("name")
     .trim()
     .notEmpty()
-    .withMessage("Username is required")
+    .withMessage("name is required")
     .custom((value) => {
       if (value.includes(" ")) {
-        throw new Error("Username cannot contain spaces");
+        throw new Error("name cannot contain spaces");
       }
       return true;
     }),
@@ -30,19 +30,19 @@ const validateRegistration = [
   body("email").trim().isEmail().withMessage("Invalid email format"),
 
   body("password")
-    .isLength({ min: 6 })
-    .withMessage("Password must be at least 6 characters long")
+    .isLength({ min: 5 })
+    .withMessage("Password must be at least 5 characters long")
     .matches(/[A-Z]/)
     .withMessage("Password must contain at least one capital letter")
     .matches(/[!@#$%^&*()\-_=+{}[\]|;:'",.<>/?]/)
     .withMessage("Password must contain at least one special character"),
 
-  body("confirmPassword").custom((value, { req }) => {
-    if (value !== req.body.password) {
-      throw new Error("Confirm password doesn't match the password");
-    }
-    return true;
-  }),
+  // body("confirmPassword").custom((value, { req }) => {
+  //   if (value !== req.body.password) {
+  //     throw new Error("Confirm password doesn't match the password");
+  //   }
+  //   return true;
+  // }),
 ];
 
 const validateUpdateUsernameEmail = [

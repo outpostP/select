@@ -17,7 +17,7 @@ app.use(
 
 app.use(express.json());
 const db = require("../models");
-db.sequelize.sync({ alter: true });
+// db.sequelize.sync({ alter: true });
 
 
 
@@ -27,14 +27,11 @@ db.sequelize.sync({ alter: true });
 // NOTE : Add your routes here
 app.use('/', express.static(path.resolve(__dirname, '../')))
 //routes
-// const { authRouter, profileRouter, adminRouter, generalRouter  } = require("./routers");
+const { authRouter, adminRouter, empRouter } = require("./routers");
 
 //middleware
-// app.use("/auth", authRouter);
-// app.use("/profile", profileRouter);
-// app.use('/admin', adminRouter);
-// app.use('/cashier', adminRouter);
-// app.use('/gen', generalRouter);
+app.use("/auth", authRouter);
+app.use("/emp", empRouter);
 
 
 // ===========================

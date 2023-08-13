@@ -17,12 +17,6 @@ module.exports = (sequelize, DataTypes) => {
        this.hasMany(models.Employee_Monthly_Salary, {
         foreignKey:'emp_id',
        })
-       this.hasMany(models.Employee_In, {
-        foreignKey:'emp_id',
-       })
-       this.hasMany(models.Employee_Out, {
-        foreignKey:'emp_id',
-       })
        this.hasMany(models.Employee_Attendance, {
         foreignKey:'emp_id',
        })
@@ -47,11 +41,13 @@ module.exports = (sequelize, DataTypes) => {
     },
     role_id: {
       type:DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      defaultValue: 2
     },
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE,
+      
     },
     updatedAt: {
       allowNull: false,
