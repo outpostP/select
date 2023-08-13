@@ -32,6 +32,7 @@ const { authRouter, adminRouter, empRouter } = require("./routers");
 //middleware
 app.use("/auth", authRouter);
 app.use("/emp", empRouter);
+app.use("/admi", adminRouter);
 
 
 // ===========================

@@ -20,6 +20,9 @@ module.exports = (sequelize, DataTypes) => {
        this.hasMany(models.Employee_Attendance, {
         foreignKey:'emp_id',
        })
+       this.hasOne(models.Employee_Base_Salary, {
+        foreignKey:'emp_id',
+       })
     }
   }
   Employee_Details.init({

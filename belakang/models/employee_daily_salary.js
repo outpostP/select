@@ -12,12 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Employee_Daily_Salary.init({
-      base_salary: {
-        type: DataTypes.FLOAT,
-        allowNull: false,
-        defaultValue: 0
-      },
-      type: {
+      daily_salary: {
         type: DataTypes.FLOAT,
         allowNull: false,
       },

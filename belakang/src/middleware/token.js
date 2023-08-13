@@ -17,9 +17,7 @@ const loginToken = (req, res, next) => {
         if (!verifiedUser) {
             return res.status(401).send('illegal unverified')
         }
-        if(!verifiedUser.isVerified) {
-            return res.status(401).send('unverified account')
-        }
+        
         req.user = verifiedUser;
         next();
     }

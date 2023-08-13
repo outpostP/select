@@ -2,25 +2,22 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Employee_Daily_Salaries', {
+    await queryInterface.createTable('Employee_Base_Salaries', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      daily_salary: {
-        type: Sequelize.FLOAT
-      },
       emp_id: {
         type: Sequelize.INTEGER
       },
-      monthly_id: {
-        type: Sequelize.INTEGER
+      base_salary: {
+        type: Sequelize.FLOAT
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
       updatedAt: {
         allowNull: false,
@@ -29,6 +26,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Employee_Daily_Salaries');
+    await queryInterface.dropTable('Employee_Base_Salaries');
   }
 };
