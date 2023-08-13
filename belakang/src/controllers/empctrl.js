@@ -10,48 +10,60 @@ async function hashUserPassword(password) {
   }
 
   async function updateProfile(req, res) {
-    const { token, name, password, birthday } = req.body;
+    const { name, password, birthday } = req.body;
     const { id } = req.user;
+    const { token } = req;
+    console.log(token);
   
     try {
       const check = await Store.findOne({
         where: {
-          URL: token
-        }
+          URL: token,
+        },
       });
   
       if (!check) {
         return res.status(401).json({ message: 'You have accessed this page' });
       }
   
-      const hashPassword = await hashUserPassword(password);
+      // Prepare an object to hold the fields that need to be updated
+      const updateFields = {};
+  
+      // Check and assign values to the updateFields object
+      if (name) {
+        updateFields.name = name;
+      }
+  
+      if (password) {
+        const hashPassword = await hashUserPassword(password);
+        updateFields.password = hashPassword;
+      }
+  
+      if (birthday) {
+        updateFields.birthday = birthday;
+      }
   
       await db.sequelize.transaction(async (t) => {
-        await Emp.update(
-          {
-            name: name,
-            password: hashPassword,
-            birthday: birthday
+        await Emp.update(updateFields, {
+          where: {
+            id: id,
           },
-          {
-            where: {
-              id: id
-            },
-            transaction: t
-          }
-        );
-
+          transaction: t,
+        });
+  
         await Store.destroy({
-          where: { token },
-          transaction: t
+          where: { URL: token },
+          transaction: t,
         });
       });
   
       return res.status(200).json({ message: 'Profile updated successfully' });
     } catch (error) {
-      return res.status(500).json(error);
+      console.log(error);
+      return res.status(500).json({ message: error });
     }
   }
+  
   
 
   module.exports = {hashUserPassword, updateProfile}

@@ -106,6 +106,19 @@ const validateUpdateStatus = [
   body("isActive").trim().notEmpty().withMessage("isActive is required"),
 ];
 
+const validateUpdateProfile = [
+  body('name')
+    .if(body('name').exists())
+    .notEmpty().withMessage('Name is required'),
+  body('password')
+    .if(body('password').exists())
+    .notEmpty().withMessage('Password is required')
+    .isLength({ min: 5 }).withMessage('Password must be at least 5 characters'),
+  body('birthday')
+    .if(body('birthday').exists())
+    .notEmpty().withMessage('Birthday is required'),
+];
+
 module.exports = {
   validateRequest,
   validateLogin,
@@ -115,4 +128,5 @@ module.exports = {
   validateUpdateStatus,
   validateForgotPassword,
   validateResetPassword,
+  validateUpdateProfile
 };
