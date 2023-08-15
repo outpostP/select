@@ -9,11 +9,14 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const Attendance = db.Employee_Attendance;
 const Daily = db.Employee_Daily_Salary;
+const Monthly = db.Employee_Monthly_Salary;
 const Dasar = db.Employee_Base_Salary;
 const fs = require('fs').promises;
 const handlebars = require('handlebars');
 const transporter = require('../middleware/transporter')
-const {Op} = require('sequelize');
+const {Op,sequelize, Sequelize} = require('sequelize');
+
+
 
 const checkIfExists = async (email, name) => {
     const user = await Emp.findOne({
@@ -55,7 +58,6 @@ const checkIfExists = async (email, name) => {
     }
   }
   
-
   const createUserAndSendEmail = async (name, email, password) => {
 
   try {
@@ -74,7 +76,7 @@ const checkIfExists = async (email, name) => {
     const token = generateToken(payload, process.env.JWT_KEY);
     console.log('f')
 
-    const redirect = `https://localhost3000/profile/${token}`;
+    const redirect = `https://localhost:5173/profile/${token}`;
 
     await sendVerification(email, name, result.id, token, redirect);
     const {id} = result
@@ -120,4 +122,101 @@ const checkIfExists = async (email, name) => {
     }
   };
 
-  module.exports = {addUser}
+  async function getAbsent (req,res) {
+    try {
+        const attendances = await Attendance.findAll();
+        res.status(200).json(attendances);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error });
+      }
+  }
+
+  async function getDaily (req,res) {
+    try {
+      const daily = await Daily.findAll();
+      res.status(200).json(daily);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error });
+    }
+  }
+
+  async function updateMonthly(req, res) {
+    const transaction = await db.sequelize.transaction(); // Start a managed transaction
+  
+    try {
+      // Get the current month and year
+      const currentDate = new Date();
+      const currentMonth = currentDate.getMonth() + 1; // Months are zero-based, so add 1
+      const currentYear = currentDate.getFullYear();
+  
+      // Retrieve the sum of daily salaries for each emp_id for the current month
+      const sumDailySalaryByEmpId = await Daily.findAll({
+        attributes: [
+          'emp_id',
+          [Sequelize.fn('sum', Sequelize.col('daily_salary')), 'total_daily_salary'],
+        ],
+        where: {
+          createdAt: {
+            [Sequelize.Op.and]: [
+              Sequelize.where(Sequelize.fn('MONTH', Sequelize.col('createdAt')), currentMonth),
+              Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('createdAt')), currentYear),
+            ],
+          },
+        },
+        group: ['emp_id'],
+        raw: true,
+        transaction, // Pass the transaction to the query
+      });
+  
+      // Update the monthly_salary for each emp_id based on the sum of daily salaries
+      for (const sumByEmpId of sumDailySalaryByEmpId) {
+        const { emp_id, total_daily_salary } = sumByEmpId;
+  
+        const monthlySalary = await Monthly.findOne({
+          where: { emp_id },
+          transaction, // Pass the transaction to the query
+        });
+  
+        if (monthlySalary) {
+          monthlySalary.monthly_salary = total_daily_salary;
+          await monthlySalary.save({ transaction }); // Pass the transaction to the save operation
+        } else {
+          await Monthly.create({
+            emp_id,
+            monthly_salary: total_daily_salary,
+          }, { transaction }); // Pass the transaction to the create operation
+        }
+      }
+  
+      await transaction.commit(); // Commit the transaction
+  
+      res.status(200).json({ message: 'success' });
+    } catch (error) {
+      await transaction.rollback(); // Rollback the transaction in case of an error
+      console.error('Error updating monthly salaries:', error);
+      res.status(500).json(error);
+    }
+  }
+  
+  async function getUsers (req,res) {
+    try {
+      const user = await Emp.findAll();
+      res.status(200).json(user)
+    } catch (error) {
+      console.error(error)
+      res.status(200).json(error)
+    }
+  }
+
+  async function getMonthly (req,res) {
+    try {
+      const monthly = await Monthly.findAll();
+      res.status(200).json(monthly)
+    } catch (error) {
+      console.error(error)
+      res.status(500).json(error)
+    }
+  }
+  module.exports = {addUser, getAbsent, getDaily, updateMonthly, getMonthly, getUsers}

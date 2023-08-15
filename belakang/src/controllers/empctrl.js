@@ -3,6 +3,9 @@ const Emp = db.Employee_Details;
 const Store = db.Edit_URL
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const Attendance = db.Employee_Attendance;
+const Daily = db.Employee_Daily_Salary;
+const Dasar = db.Employee_Base_Salary;
 
 async function hashUserPassword(password) {
     const salt = await bcrypt.genSalt(10);
@@ -26,10 +29,8 @@ async function hashUserPassword(password) {
         return res.status(401).json({ message: 'You have accessed this page' });
       }
   
-      // Prepare an object to hold the fields that need to be updated
       const updateFields = {};
   
-      // Check and assign values to the updateFields object
       if (name) {
         updateFields.name = name;
       }
@@ -64,6 +65,35 @@ async function hashUserPassword(password) {
     }
   }
   
-  
+  async function getAbsent (req,res) {
+    try {
+      const {id} = req.user;
+      const absent = await Attendance.findAll({
+        where: {
+          emp_id: id
+        }
+      })
+      res.status(200).json(absent)
+    } catch (error) {
+      console.error(error)
+      res.status(200).json(error)
+    }
+  }
 
-  module.exports = {hashUserPassword, updateProfile}
+  async function getDaily (req,res) {
+    try {
+      const {id} = req.user;
+      const daily = await Daily.findAll({
+        where: {
+          emp_id: id
+        }
+      });
+      res.status(200).json(daily);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error });
+    }
+  }
+
+  
+  module.exports = {getAbsent, updateProfile, getDaily}
